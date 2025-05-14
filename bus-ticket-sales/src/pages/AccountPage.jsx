@@ -6,39 +6,29 @@ import styled, { keyframes } from 'styled-components';
 import { useLang } from '../context/LangContext';
 import Loader from '../components/Loader';
 import { useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
+import arialBase64 from '../fonts/arial_base64';
+import { useTheme } from '../context/ThemeContext';
 
-/**
- * Fade-in animation for tickets list
- */
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 `;
 
-/**
- * Container wrapping the page
- */
 const PageContainer = styled.div`
   padding: 3rem 2rem;
   min-height: 75vh;
-  background: ${({ themeMode }) => (themeMode === 'light' ? '#f8f9fa' : '#18181b')};
+  background: ${({ theme }) => (theme.mode === 'light' ? '#f8f9fa' : '#18181b')};
   animation: ${fadeIn} 0.6s ease-out;
-  color: ${({ themeMode }) => (themeMode === 'light' ? '#333' : '#ddd')};
+  color: ${({ theme }) => (theme.mode === 'light' ? '#333' : '#ddd')};
 `;
 
-/**
- * Page title styling
- */
 const Title = styled.h2`
   font-size: 2rem;
   text-align: center;
   margin-bottom: 2rem;
 `;
 
-/**
- * Grid for tickets
- */
 const TicketsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
@@ -47,11 +37,8 @@ const TicketsGrid = styled.div`
   margin: 0 auto;
 `;
 
-/**
- * Individual ticket card
- */
 const TicketCard = styled.div`
-  background: ${({ themeMode }) => (themeMode === 'light' ? '#ffffff' : '#1e1e22')};
+  background: ${({ theme }) => (theme.mode === 'light' ? '#ffffff' : '#1e1e22')};
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -67,9 +54,6 @@ const TicketCard = styled.div`
   }
 `;
 
-/**
- * Ticket details block
- */
 const TicketDetails = styled.div`
   margin-bottom: 1rem;
   h3 {
@@ -79,22 +63,16 @@ const TicketDetails = styled.div`
   p {
     margin: 0.25rem 0;
     font-size: 0.9rem;
-    color: ${({ themeMode }) => (themeMode === 'light' ? '#555' : '#aaa')};
+    color: ${({ theme }) => (theme.mode === 'light' ? '#555' : '#aaa')};
   }
 `;
 
-/**
- * Button container for actions
- */
 const Actions = styled.div`
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
 `;
 
-/**
- * Styled button for actions
- */
 const ActionButton = styled.button`
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
@@ -128,30 +106,34 @@ const ActionButton = styled.button`
   }
 `;
 
-/**
- * No tickets message
- */
 const EmptyMsg = styled.p`
   text-align: center;
   font-style: italic;
-  color: ${({ themeMode }) => (themeMode === 'light' ? '#777' : '#999')};
+  color: ${({ theme }) => (theme.mode === 'light' ? '#777' : '#999')};
 `;
 
-/**
- * AccountPage component:
- * - fetches and displays user tickets
- * - allows PDF download and cancellation
- */
+const ToggleThemeButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 0.5rem 1rem;
+  background: ${({ theme }) => (theme.mode === 'light' ? '#333' : '#fff')};
+  color: ${({ theme }) => (theme.mode === 'light' ? '#fff' : '#333')};
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+`;
+
 export default function AccountPage() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { L } = useLang();
   const navigate = useNavigate();
-  const themeMode = document.documentElement.getAttribute('data-theme') || 'light';
+  const { theme, toggle } = useTheme();
   const user_id = localStorage.getItem('user_id');
 
-  // Fetch tickets on mount
   useEffect(() => {
     if (!user_id) {
       navigate('/login');
@@ -169,23 +151,36 @@ export default function AccountPage() {
       });
   }, [user_id, navigate, L]);
 
-  // PDF download handler
   const downloadPDF = (ticket) => {
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('🚌 BusTickets', 20, 20);
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    doc.addFileToVFS('Arial.ttf', arialBase64.trim());
+    doc.addFont('Arial.ttf', 'Arial', 'normal');
+    doc.setFont('Arial');
+
+    doc.setFontSize(20);
+    doc.text('🚌 BusTickets', 40, 60);
     doc.setFontSize(12);
-    doc.text(`Маршрут: ${ticket.origin} → ${ticket.destination}`, 20, 40);
-    doc.text(`Дата: ${new Date(ticket.departure_time).toLocaleString()}`, 20, 50);
-    doc.text(`Перевізник: ${ticket.operator}`, 20, 60);
-    doc.text(`Пасажир: ${ticket.passenger_name}`, 20, 70);
-    doc.text(`Телефон: ${ticket.passenger_phone}`, 20, 80);
-    doc.text(`Email: ${ticket.passenger_email}`, 20, 90);
-    doc.text(`Квиток №${ticket.id}`, 20, 100);
+
+    let y = 100;
+    const lines = [
+      `Маршрут:       ${ticket.origin} → ${ticket.destination}`,
+      `Дата:          ${new Date(ticket.departure_time).toLocaleString()}`,
+      `Перевізник:    ${ticket.operator}`,
+      `${L('passenger')}:     ${ticket.passenger_name}`,
+      `Телефон:       ${ticket.passenger_phone}`,
+      `Email:         ${ticket.passenger_email}`,
+      `Ціна:          ${ticket.price} грн (Оплата при посадці)`,
+      `Квиток №       ${ticket.id}`,
+    ];
+
+    lines.forEach(line => {
+      doc.text(line, 40, y);
+      y += 20;
+    });
+
     doc.save(`ticket_${ticket.id}.pdf`);
   };
 
-  // Cancel ticket handler
   const handleCancel = (id) => {
     if (!window.confirm(L('Are you sure you want to cancel this ticket?') || 'Are you sure?')) return;
     cancelTicket(id)
@@ -201,27 +196,31 @@ export default function AccountPage() {
   if (loading) return <Loader />;
 
   return (
-    <PageContainer themeMode={themeMode}>
+    <PageContainer theme={{ mode: theme }}>
+      <ToggleThemeButton theme={{ mode: theme }} onClick={toggle}>
+        {theme === 'light' ? '🌙 Темна тема' : '☀️ Світла тема'}
+      </ToggleThemeButton>
+
       <Title>{L('Your Tickets')}</Title>
-      {error && <EmptyMsg themeMode={themeMode}>{error}</EmptyMsg>}
+      {error && <EmptyMsg theme={{ mode: theme }}>{error}</EmptyMsg>}
       {!error && tickets.length === 0 && (
-        <EmptyMsg themeMode={themeMode}>{L('No tickets purchased yet!')}</EmptyMsg>
+        <EmptyMsg theme={{ mode: theme }}>{L('No tickets purchased yet!')}</EmptyMsg>
       )}
       {tickets.length > 0 && (
         <TicketsGrid>
           {tickets.map(ticket => (
-            <TicketCard key={ticket.id} themeMode={themeMode}>
-              <TicketDetails themeMode={themeMode}>
+            <TicketCard key={ticket.id} theme={{ mode: theme }}>
+              <TicketDetails theme={{ mode: theme }}>
                 <h3>{ticket.origin} → {ticket.destination}</h3>
                 <p>{new Date(ticket.departure_time).toLocaleString()}</p>
                 <p>{ticket.operator}</p>
               </TicketDetails>
               <Actions>
                 <ActionButton className="download" onClick={() => downloadPDF(ticket)}>
-                  📄 {L('download')}
+                   {L('download')}
                 </ActionButton>
                 <ActionButton className="cancel" onClick={() => handleCancel(ticket.id)}>
-                  ❌ {L('cancel')}
+                   {L('cancel')}
                 </ActionButton>
               </Actions>
             </TicketCard>

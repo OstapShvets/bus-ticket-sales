@@ -17,12 +17,12 @@ const wave = keyframes`
  * Footer container with position relative to hold waves
  */
 const FooterContainer = styled.footer`
-  position: relative;
+  position: sticky;
   width: 100%;
-  background: ${({ themeMode }) => (themeMode === 'light' ? '#f8f9fa' : '#1a1a1a')};
-  color: ${({ themeMode }) => (themeMode === 'light' ? '#333' : '#ddd')};
+  background: ${({ themeMode }) => (themeMode === 'light' ? '#e4e6eb' : '#101114')};
+  color: ${({ themeMode }) => (themeMode === 'light' ? '#555' : '#aaa')};
   overflow: hidden;
-  padding-top: 4rem;
+  padding-top: 1rem;
 `;
 
 /**
@@ -109,7 +109,7 @@ const SocialIcon = styled.a`
 
   &:hover {
     transform: scale(1.2);
-    color: #007bff;
+    color:rgb(255, 0, 0);
   }
 `;
 
@@ -131,13 +131,14 @@ export default function AnimatedFooter() {
   const { L } = useLang();
   const themeMode = document.documentElement.getAttribute('data-theme') || 'light';
 
+
   return (
     <FooterContainer themeMode={themeMode}>
       <WaveWrapper themeMode={themeMode} />
       <Content>
         <Column>
-          <ColumnHeading>{L('support')}</ColumnHeading>
-          <FooterLink href="/support">{L('support')}</FooterLink>
+          <ColumnHeading>Support</ColumnHeading>
+          <FooterLink href="/support">Support</FooterLink>
           <FooterLink href="/faq">FAQ</FooterLink>
         </Column>
 

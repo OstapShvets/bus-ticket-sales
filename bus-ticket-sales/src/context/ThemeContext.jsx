@@ -4,9 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
-/**
- * Provides themeMode ('light' | 'dark') and toggle()
- */
+
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 

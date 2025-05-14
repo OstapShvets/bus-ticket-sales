@@ -1,54 +1,86 @@
+// src/pages/SupportFAQ.jsx
 import React from 'react';
+import styled, { keyframes } from 'styled-components';
+import { useLang } from '../context/LangContext';
+import { useTheme } from '../context/ThemeContext';
+
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
+const PageWrapper = styled.section`
+  padding: 3rem 1rem;
+  background: ${({ $theme }) => ($theme === 'light' ? '#f8f9fa' : '#121416')};
+  color: ${({ $theme }) => ($theme === 'light' ? '#1f1f1f' : '#f0f0f0')};
+  animation: ${fadeIn} 0.5s ease-out;
+`;
+
+const Container = styled.div`
+  max-width: 860px;
+  margin: 0 auto;
+`;
+
+const Title = styled.h1`
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+`;
+
+const Subtitle = styled.p`
+  font-size: 1.2rem;
+  color: ${({ $theme }) => ($theme === 'light' ? '#555' : '#ccc')};
+  margin-bottom: 2.5rem;
+`;
+
+const QAList = styled.ol`
+  list-style: decimal;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+`;
+
+const Question = styled.h2`
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+`;
+
+const Answer = styled.p`
+  font-size: 1.05rem;
+  line-height: 1.7;
+`;
 
 export default function SupportFAQ() {
-  return (
-    <section className="pt-32 pb-20 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-12 md:p-20">
-        <header className="mb-10 text-center">
-          <h1 className="text-6xl font-extrabold text-gray-900 dark:text-white leading-tight">
-            FAQ
-          </h1>
-          <p className="mt-4 text-2xl text-gray-600 dark:text-gray-300">
-            Часті запитання
-          </p>
-          <div className="mt-6 h-1 w-24 mx-auto bg-blue-500 rounded-full"></div>
-        </header>
+  const { theme } = useTheme();
+  const { L } = useLang();
 
-        <ol className="list-decimal list-inside space-y-12 prose prose-lg dark:prose-dark max-w-none">
+  return (
+    <PageWrapper $theme={theme}>
+      <Container>
+        <Title>{L('faq_title')}</Title>
+        <Subtitle $theme={theme}>{L('faq_subtitle')}</Subtitle>
+
+        <QAList>
           <li>
-            <h2 className="font-semibold text-2xl text-gray-900 dark:text-white">
-              Як забронювати квиток?
-            </h2>
-            <p className="mt-2 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-              На головній сторінці введіть «Звідки», «Куди», дату і кількість пасажирів → натисніть «Пошук» → оберіть рейс → введіть дані пасажирів → «Підтвердити».
-            </p>
+            <Question>{L('faq_q1')}</Question>
+            <Answer>{L('faq_a1')}</Answer>
           </li>
           <li>
-            <h2 className="font-semibold text-2xl text-gray-900 dark:text-white">
-              Як завантажити PDF-квиток?
-            </h2>
-            <p className="mt-2 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-              Після бронювання перейдіть до «Кабінет» → знайдіть потрібний квиток → натисніть «Завантажити PDF».
-            </p>
+            <Question>{L('faq_q2')}</Question>
+            <Answer>{L('faq_a2')}</Answer>
           </li>
           <li>
-            <h2 className="font-semibold text-2xl text-gray-900 dark:text-white">
-              Як скасувати квиток?
-            </h2>
-            <p className="mt-2 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-              В особистому кабінеті поруч із квитком натисніть «Скасувати квиток» і підтвердіть.
-            </p>
+            <Question>{L('faq_q3')}</Question>
+            <Answer>{L('faq_a3')}</Answer>
           </li>
           <li>
-            <h2 className="font-semibold text-2xl text-gray-900 dark:text-white">
-              Чи потрібно реєструватися для пошуку рейсу?
-            </h2>
-            <p className="mt-2 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-              Ні, пошук рейсів та перегляд спецпропозицій доступні без авторизації.
-            </p>
+            <Question>{L('faq_q4')}</Question>
+            <Answer>{L('faq_a4')}</Answer>
           </li>
-        </ol>
-      </div>
-    </section>
+        </QAList>
+      </Container>
+    </PageWrapper>
   );
 }

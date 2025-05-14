@@ -26,7 +26,7 @@ const Banner = styled.section`
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+    background: linear-gradient(to bottom, rgba(17, 111, 219, 0.4), rgba(173, 212, 17, 0.7));
     z-index: 1;
   }
 `;

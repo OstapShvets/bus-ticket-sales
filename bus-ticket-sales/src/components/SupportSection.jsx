@@ -1,8 +1,7 @@
-// src/components/SupportSection.jsx
-
 import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useLang } from '../context/LangContext';
+import { useTheme } from '../context/ThemeContext';
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -10,8 +9,8 @@ const fadeIn = keyframes`
 `;
 
 const Section = styled.section`
-  background: ${({ themeMode }) => (themeMode === 'light' ? '#f0f4f8' : '#181a1f')};
-  color: ${({ themeMode }) => (themeMode === 'light' ? '#333' : '#eee')};
+  background: ${({ $theme }) => ($theme === 'light' ? '#f0f2f5' : '#101214')};
+  color: ${({ $theme }) => ($theme === 'light' ? '#1c1c1c' : '#f1f1f1')};
   padding: 4rem 2rem;
   display: flex;
   flex-direction: column;
@@ -20,39 +19,31 @@ const Section = styled.section`
 `;
 
 const Heading = styled.h2`
-  font-size: 2.5rem;
+  font-size: 2rem;
+  font-weight: 600;
   margin-bottom: 1rem;
-  position: relative;
-  padding-bottom: 0.5rem;
-  &::after {
-    content: '';
-    width: 60px;
-    height: 4px;
-    background: #007bff;
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-  }
+  text-align: center;
 `;
 
 const Subtitle = styled.p`
   text-align: center;
   margin-bottom: 1rem;
   font-size: 1rem;
+  font-weight: 400;
 `;
 
 const ContactInfo = styled.div`
   text-align: center;
   margin-bottom: 2rem;
   font-size: 1rem;
-  color: ${({ themeMode }) => (themeMode === 'light' ? '#555' : '#ccc')};
+  color: ${({ $theme }) => ($theme === 'light' ? '#555' : '#ccc')};
 
   span, a {
     display: block;
     margin-bottom: 0.5rem;
     color: inherit;
     text-decoration: none;
+    font-weight: 500;
 
     &:hover {
       text-decoration: underline;
@@ -70,48 +61,69 @@ const ContactForm = styled.form`
 `;
 
 const Input = styled.input`
-  padding: 0.75rem;
-  border: 1px solid ${({ themeMode }) => (themeMode === 'light' ? '#ddd' : '#444')};
-  border-radius: 4px;
-  background: ${({ themeMode }) => (themeMode === 'light' ? '#fff' : '#222')};
-  color: ${({ themeMode }) => (themeMode === 'light' ? '#333' : '#ddd')};
+  padding: 0.75rem 1rem;
+  border: 2px solid ${({ $theme }) => ($theme === 'light' ? '#d0d7de' : '#3a3f44')};
+  border-radius: 6px;
+  background: ${({ $theme }) => ($theme === 'light' ? '#ffffff' : '#2b2f35')};
+  color: ${({ $theme }) => ($theme === 'light' ? '#2c2c2c' : '#e6e6e6')};
+  font-size: 1rem;
   outline: none;
+  transition: border-color 0.3s;
 
   &:focus {
-    border-color: #007bff;
+    border-color: #3d8bfd;
   }
 `;
 
 const Textarea = styled.textarea`
-  ${Input};
+  padding: 0.75rem 1rem;
+  border: 2px solid ${({ $theme }) => ($theme === 'light' ? '#d0d7de' : '#3a3f44')};
+  border-radius: 6px;
+  background: ${({ $theme }) => ($theme === 'light' ? '#ffffff' : '#2b2f35')};
+  color: ${({ $theme }) => ($theme === 'light' ? '#2c2c2c' : '#e6e6e6')};
+  font-size: 1rem;
+  outline: none;
   resize: vertical;
   min-height: 120px;
+  transition: border-color 0.3s;
+
+  &:focus {
+    border-color: #3d8bfd;
+  }
 `;
 
 const Button = styled.button`
   padding: 0.75rem;
-  background: #007bff;
+  background: linear-gradient(to right, #007bff, #0056b3);
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.3s;
 
   &:hover {
-    background: #0056b3;
+    background: linear-gradient(to right, #0056b3, #004190);
   }
 `;
 
 const SuccessMessage = styled.div`
+  margin-bottom: 1rem;
   padding: 1rem;
-  background: #d4edda;
-  color: #155724;
-  border-radius: 4px;
+  background: #103e26;
+  color: #27ae60;
+  border: 1px solid #27ae60;
+  border-radius: 6px;
   text-align: center;
+  font-weight: 500;
+  max-width: 600px;
+  width: 100%;
 `;
 
 export default function SupportSection() {
   const { L } = useLang();
-  const themeMode = document.documentElement.getAttribute('data-theme') || 'light';
+  const { theme } = useTheme();
 
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
@@ -135,22 +147,22 @@ export default function SupportSection() {
   };
 
   return (
-    <Section themeMode={themeMode}>
-      <Heading>{L('Підтримка')}</Heading>
-      <Subtitle>{L('Якщо у вас є питання, пишіть або телефонуйте:')}</Subtitle>
+    <Section $theme={theme}>
+      <Heading>{L('Support')}</Heading>
+      <Subtitle>{L('If you have questions, write or call:')}</Subtitle>
 
-      <ContactInfo>
+      <ContactInfo $theme={theme}>
         <span>📞 +38 (050) 212-24-76</span>
         <a href="mailto:support@bustickets.ua">✉️ support@bustickets.ua</a>
       </ContactInfo>
 
-      {submitted && <SuccessMessage>{L('Ваше повідомлення успішно надіслано!')}</SuccessMessage>}
+      {submitted && <SuccessMessage>{L('Your message was successfully sent!')}</SuccessMessage>}
 
       <ContactForm onSubmit={handleSubmit}>
-        <Input themeMode={themeMode} name="name" placeholder={L('Ім’я')} value={formData.name} onChange={handleChange} required />
-        <Input themeMode={themeMode} name="email" type="email" placeholder={L('Email')} value={formData.email} onChange={handleChange} required />
-        <Textarea themeMode={themeMode} name="message" placeholder={L('Повідомлення')} value={formData.message} onChange={handleChange} required />
-        <Button type="submit">{L('Надіслати')}</Button>
+        <Input $theme={theme} name="name" placeholder={L('Name')} value={formData.name} onChange={handleChange} required />
+        <Input $theme={theme} name="email" type="email" placeholder={L('Email')} value={formData.email} onChange={handleChange} required />
+        <Textarea $theme={theme} name="message" placeholder={L('Message')} value={formData.message} onChange={handleChange} required />
+        <Button type="submit">📩 {L('Send')}</Button>
       </ContactForm>
     </Section>
   );

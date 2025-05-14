@@ -4,7 +4,13 @@ import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { getTopRoutes } from '../api';
 import { useLang } from '../context/LangContext';
+import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
+
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
 
 const pop = keyframes`
   0%   { transform: scale(1); }
@@ -13,46 +19,48 @@ const pop = keyframes`
 `;
 
 const Section = styled.section`
-  padding: 3rem 2rem;
-  background: ${({ themeMode }) => (themeMode === 'light' ? '#f9f9f9' : '#121212')};
-  color: ${({ themeMode }) => (themeMode === 'light' ? '#333' : '#eee')};
+  padding: 4rem 2rem;
+  animation: ${fadeIn} 0.8s ease-out;
+  background: ${({ $theme }) => ($theme === 'light' ? '#f9f9f9' : '#121212')};
+  color: ${({ $theme }) => ($theme === 'light' ? '#333' : '#eee')};
 `;
 
 const Heading = styled.h2`
-  font-size: 2.5rem;
   text-align: center;
+  font-size: 2.5rem;
   margin-bottom: 2rem;
-  opacity: 0;
-  animation: ${keyframes`
-    from { opacity: 0; transform: translateX(-20px); }
-    to   { opacity: 1; transform: translateX(0); }
-  `} 0.8s ease-out forwards;
+  position: relative;
+
+  &:after {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 4px;
+    background: #007bff;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 `;
 
 const Grid = styled.div`
   display: grid;
-  gap: 1.5rem;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
 const Card = styled.div`
-  background: ${({ themeMode }) => (themeMode === 'light' ? '#ffffff' : '#1e1e1e')};
-  color: ${({ themeMode }) => (themeMode === 'light' ? '#333' : '#ddd')};
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: ${({ $theme }) => ($theme === 'light' ? '#ffffff' : '#1e1e1e')};
+  color: ${({ $theme }) => ($theme === 'light' ? '#333' : '#ddd')};
+  border-radius: 10px;
   padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     animation: ${pop} 0.4s ease-in-out;
@@ -64,33 +72,34 @@ const RouteInfo = styled.div`
   margin-bottom: 1rem;
 
   h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
   }
 
   p {
     margin: 0.25rem 0;
-    font-size: 0.9rem;
-    color: ${({ themeMode }) => (themeMode === 'light' ? '#555' : '#aaa')};
+    font-size: 0.95rem;
+    color: ${({ $theme }) => ($theme === 'light' ? '#555' : '#aaa')};
   }
 `;
 
 const Price = styled.div`
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: bold;
   margin-bottom: 1rem;
-  color:rgb(28, 209, 24);
+  color: rgb(28, 209, 24);
 `;
 
 const BookButton = styled.button`
   background: #007bff;
-  color: #ffffff;
+  color: #fff;
   border: none;
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
-  cursor: pointer;
+  font-weight: 600;
   text-transform: uppercase;
+  cursor: pointer;
   transition: background 0.3s ease;
 
   &:hover {
@@ -103,8 +112,8 @@ export default function TopOffers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { L } = useLang();
+  const { theme } = useTheme();
   const navigate = useNavigate();
-  const themeMode = document.documentElement.getAttribute('data-theme') || 'light';
 
   useEffect(() => {
     getTopRoutes()
@@ -121,8 +130,8 @@ export default function TopOffers() {
 
   if (loading) {
     return (
-      <Section themeMode={themeMode}>
-        <Heading themeMode={themeMode}>{L('popular_routes')}</Heading>
+      <Section $theme={theme}>
+        <Heading>{L('popular_routes')}</Heading>
         <p>{L('loading')}</p>
       </Section>
     );
@@ -130,26 +139,28 @@ export default function TopOffers() {
 
   if (error) {
     return (
-      <Section themeMode={themeMode}>
-        <Heading themeMode={themeMode}>{L('popular_routes')}</Heading>
+      <Section $theme={theme}>
+        <Heading>{L('popular_routes')}</Heading>
         <p>{error}</p>
       </Section>
     );
   }
 
   return (
-    <Section themeMode={themeMode}>
-      <Heading themeMode={themeMode}>{L('popular_routes')}</Heading>
+    <Section $theme={theme}>
+      <Heading>{L('popular_routes')}</Heading>
       <Grid>
-        {offers.map(route => (
-          <Card key={route.id} themeMode={themeMode}>
-            <RouteInfo themeMode={themeMode}>
+        {offers.slice(0, 4).map(route => (
+          <Card key={route.id} $theme={theme}>
+            <RouteInfo $theme={theme}>
               <h3>{route.origin} → {route.destination}</h3>
               <p>{new Date(route.departure_time).toLocaleDateString()}</p>
               <p>{route.seats_available} {L('seats_left')}</p>
             </RouteInfo>
             <Price>{route.price} UAH</Price>
-            <BookButton onClick={() => navigate(`/booking?origin=${route.origin}&destination=${route.destination}&date=${route.departure_time.split('T')[0]}&passengers=1`)}>
+            <BookButton onClick={() =>
+              navigate(`/booking?origin=${route.origin}&destination=${route.destination}&date=${route.departure_time.split('T')[0]}&passengers=1`)
+            }>
               {L('book_now')}
             </BookButton>
           </Card>
