@@ -163,8 +163,8 @@ export default function Navbar() {
           {/* Пошукове посилання видалено */}
           {/* Акаунтове посилання видалено */}
           <NavLinkStyled to="/support">{L('support')}</NavLinkStyled>
-          <NavLinkStyled to="/login">{L('login')}</NavLinkStyled>
-          <NavLinkStyled to="/register">{L('register')}</NavLinkStyled>
+          <NavLinkStyled to="/login">{L('personal_account')}</NavLinkStyled>
+          {/* <NavLinkStyled to="/register">{L('register')}</NavLinkStyled> */}
         </NavLinks>
       </LeftGroup>
 
@@ -175,11 +175,10 @@ export default function Navbar() {
       {mobileOpen && (
         <MobileNavLinks themeMode={themeMode}>
           <MobileLink to="/" onClick={handleLogoClick}>{L('home')}</MobileLink>
-          {/* Пошукове посилання видалено */}
           <MobileLink to="/account" onClick={handleMobileToggle}>{L('account')}</MobileLink>
           <MobileLink to="/support" onClick={handleMobileToggle}>{L('support')}</MobileLink>
           <MobileLink to="/login" onClick={handleMobileToggle}>{L('login')}</MobileLink>
-          <MobileLink to="/register" onClick={handleMobileToggle}>{L('register')}</MobileLink>
+          <MobileLink to="/register" onClick={handleMobileToggle}>{L('register')}</MobileLink> 
           <MobileLink as="button" onClick={() => { toggleTheme(); handleMobileToggle(); }}>
             {themeMode==='light'? '☀️ Dark':'🌙 Light'}
           </MobileLink>

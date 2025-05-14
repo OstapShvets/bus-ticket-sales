@@ -1,9 +1,9 @@
-// src/pages/PassengerForm.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { bookTicket } from '../api';
 import { useLang } from '../context/LangContext';
+import { useTheme } from '../context/ThemeContext';
 import Loader from '../components/Loader';
 
 const slideIn = keyframes`
@@ -138,8 +138,7 @@ export default function PassengerForm() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { L } = useLang();
-  const themeMode =
-    document.documentElement.getAttribute('data-theme') || 'light';
+  const { theme } = useTheme(); 
 
   const schedule_id = searchParams.get('schedule_id');
   const user_id = searchParams.get('user_id');
@@ -181,21 +180,15 @@ export default function PassengerForm() {
     e.preventDefault();
     setMsg({ text: '', type: '' });
 
-    // Перевіряємо, що всі імена заповнені
     for (let i = 0; i < names.length; i++) {
       if (!names[i]) {
-        setMsg({
-          text: L('Please fill out all passenger names'),
-          type: 'error'
-        });
+        setMsg({ text: L('Please fill out all passenger names'), type: 'error' });
         return;
       }
     }
+
     if (!contact.phone || !contact.email) {
-      setMsg({
-        text: L('Please fill out phone and email'),
-        type: 'error'
-      });
+      setMsg({ text: L('Please fill out phone and email'), type: 'error' });
       return;
     }
 
@@ -208,14 +201,11 @@ export default function PassengerForm() {
         passenger_phone: contact.phone,
         passenger_email: contact.email
       });
-      // Переадресація на TicketPage з усіма ticket_ids через кому
+
       navigate(`/ticket/${data.ticket_ids.join(',')}`);
     } catch (err) {
       console.error('Booking error:', err);
-      setMsg({
-        text: L('Failed_to_book_ticket') || 'Failed to book ticket',
-        type: 'error'
-      });
+      setMsg({ text: L('Failed_to_book_ticket') || 'Failed to book ticket', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -224,16 +214,16 @@ export default function PassengerForm() {
   if (loading) return <Loader />;
 
   return (
-    <PageWrapper themeMode={themeMode}>
+    <PageWrapper themeMode={theme}>
       <FormTitle>{L('passenger_details')}</FormTitle>
       <FormContainer onSubmit={handleSubmit}>
         {names.map((n, idx) => (
-          <PassengerBlock key={idx} themeMode={themeMode}>
+          <PassengerBlock key={idx} themeMode={theme}>
             <legend>{`${L('passenger')} ${idx + 1}`}</legend>
             <Label htmlFor={`name-${idx}`}>{L('Full_Name')}</Label>
             <Input
               id={`name-${idx}`}
-              themeMode={themeMode}
+              themeMode={theme}
               type="text"
               value={n}
               onChange={handleNameChange(idx)}
@@ -248,7 +238,7 @@ export default function PassengerForm() {
           <Input
             id="contact_phone"
             name="phone"
-            themeMode={themeMode}
+            themeMode={theme}
             type="tel"
             value={contact.phone}
             onChange={handleContactChange}
@@ -256,15 +246,15 @@ export default function PassengerForm() {
             required
           />
 
-          <Label htmlFor="contact_email">{L('Email_Address')}</Label>
+          <Label htmlFor="contact_email">{L('Email')}</Label>
           <Input
             id="contact_email"
             name="email"
-            themeMode={themeMode}
+            themeMode={theme}
             type="email"
             value={contact.email}
             onChange={handleContactChange}
-            placeholder={L('Email_Address')}
+            placeholder={L('Email Adress')}
             required
           />
         </ContactBlock>

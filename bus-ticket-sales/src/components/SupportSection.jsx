@@ -38,17 +38,18 @@ const ContactInfo = styled.div`
   font-size: 1rem;
   color: ${({ $theme }) => ($theme === 'light' ? '#555' : '#ccc')};
 
-  span, a {
+  span {
     display: block;
     margin-bottom: 0.5rem;
-    color: inherit;
-    text-decoration: none;
     font-weight: 500;
-
-    &:hover {
-      text-decoration: underline;
-    }
   }
+`;
+
+const MessageInfo = styled.p`
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  max-width: 600px;
 `;
 
 const ContactForm = styled.form`
@@ -137,7 +138,7 @@ export default function SupportSection() {
     e.preventDefault();
     fetch('http://localhost:5000/api/support', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
     }).then(() => {
       setSubmitted(true);
@@ -149,19 +150,42 @@ export default function SupportSection() {
   return (
     <Section $theme={theme}>
       <Heading>{L('Support')}</Heading>
-      <Subtitle>{L('If you have questions, write or call:')}</Subtitle>
+      <Subtitle>{L('If you have questions, call')}:</Subtitle>
 
       <ContactInfo $theme={theme}>
         <span>📞 +38 (050) 212-24-76</span>
-        <a href="mailto:support@bustickets.ua">✉️ support@bustickets.ua</a>
       </ContactInfo>
+
+      <MessageInfo>{L('You can also send us a message and we will get back to you.')}</MessageInfo>
 
       {submitted && <SuccessMessage>{L('Your message was successfully sent!')}</SuccessMessage>}
 
       <ContactForm onSubmit={handleSubmit}>
-        <Input $theme={theme} name="name" placeholder={L('Name')} value={formData.name} onChange={handleChange} required />
-        <Input $theme={theme} name="email" type="email" placeholder={L('Email')} value={formData.email} onChange={handleChange} required />
-        <Textarea $theme={theme} name="message" placeholder={L('Message')} value={formData.message} onChange={handleChange} required />
+        <Input
+          $theme={theme}
+          name="name"
+          placeholder={L('Name')}
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          $theme={theme}
+          name="email"
+          type="email"
+          placeholder={L('Email')}
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+        <Textarea
+          $theme={theme}
+          name="message"
+          placeholder={L('Message')}
+          value={formData.message}
+          onChange={handleChange}
+          required
+        />
         <Button type="submit">📩 {L('Send')}</Button>
       </ContactForm>
     </Section>
