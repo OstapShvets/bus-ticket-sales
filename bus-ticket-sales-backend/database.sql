@@ -1,0 +1,47 @@
+CREATE DATABASE IF NOT EXISTS bus_tickets_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+USE bus_tickets_db;
+
+-- Користувачі
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Розклад (маршрути)
+CREATE TABLE IF NOT EXISTS schedule (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  origin VARCHAR(100) NOT NULL,
+  destination VARCHAR(100) NOT NULL,
+  departure_time DATETIME NOT NULL,
+  operator VARCHAR(100) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  seats_available INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Квитки
+CREATE TABLE IF NOT EXISTS tickets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  schedule_id INT NOT NULL,
+  passenger_name VARCHAR(100) NOT NULL,
+  passenger_phone VARCHAR(30) NOT NULL,
+  passenger_email VARCHAR(150) NOT NULL,
+  purchase_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (schedule_id) REFERENCES schedule(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Запитання користувачів (Support Requests)
+CREATE TABLE IF NOT EXISTS support_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  question TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;

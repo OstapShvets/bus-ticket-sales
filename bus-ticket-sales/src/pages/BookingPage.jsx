@@ -1,0 +1,215 @@
+// src/pages/BookingPage.jsx
+
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import styled, { keyframes } from 'styled-components';
+import { searchRoutes } from '../api';
+import { useLang } from '../context/LangContext';
+import Loader from '../components/Loader';
+
+/**
+ * Fade-in animation for page content
+ */
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
+/**
+ * Page container
+ */
+const PageContainer = styled.div`
+  padding: 3rem 2rem;
+  background: ${({ themeMode }) => (themeMode === 'light' ? '#fafafa' : '#181a1b')};
+  min-height: 80vh;
+  animation: ${fadeIn} 0.8s ease-out;
+  color: ${({ themeMode }) => (themeMode === 'light' ? '#333' : '#ddd')};
+`;
+
+/**
+ * Header/title
+ */
+const Title = styled.h2`
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+`;
+
+/**
+ * Grid for route cards
+ */
+const RoutesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+`;
+
+/**
+ * Individual route card
+ */
+const RouteCard = styled.div`
+  background: ${({ themeMode }) => (themeMode === 'light' ? '#fff' : '#1f1f23')};
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+`;
+
+/**
+ * Route details within card
+ */
+const RouteDetails = styled.div`
+  margin-bottom: 1rem;
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+  }
+  p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: ${({ themeMode }) => (themeMode === 'light' ? '#555' : '#aaa')};
+  }
+`;
+
+/**
+ * Action container for price & button
+ */
+const ActionBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+/**
+ * Price text
+ */
+const PriceText = styled.span`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ff5a5f;
+`;
+
+/**
+ * Book button
+ */
+const BookBtn = styled.button`
+  padding: 0.5rem 1rem;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.3s;
+
+  &:hover {
+    background: #0056b3;
+  }
+`;
+
+/**
+ * Error message styling
+ */
+const ErrorMsg = styled.div`
+  color: #c0392b;
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1rem;
+`;
+
+/**
+ * BookingPage component:
+ * - fetches routes by query params
+ * - handles loading, error, empty states
+ * - displays grid of route cards
+ */
+export default function BookingPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { L } = useLang();
+  const themeMode = document.documentElement.getAttribute('data-theme') || 'light';
+
+  const [routes, setRoutes]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
+
+  // Extract search params
+  const origin      = searchParams.get('origin')      || '';
+  const destination = searchParams.get('destination') || '';
+  const date        = searchParams.get('date')        || '';
+  const passengers  = searchParams.get('passengers')  || '1'; // <-- читаємо кількість пасажирів
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    searchRoutes({ origin, destination, date })
+      .then(response => {
+        setRoutes(response.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Search error:', err);
+        setError(L('Failed to load routes') || 'Failed to load routes');
+        setLoading(false);
+      });
+  }, [origin, destination, date, L]);
+
+  // Handler when user clicks "Book Now"
+  const handleBook = (schedule_id) => {
+    const user_id = localStorage.getItem('user_id');
+    if (!user_id) {
+      navigate('/login');
+    } else {
+      // Передаємо schedule_id, user_id та passengers
+      const params = new URLSearchParams({ schedule_id, user_id, passengers });
+      navigate(`/passengers?${params.toString()}`);
+    }
+  };
+
+  if (loading) {
+    return <Loader showSkeleton={false} />;
+  }
+
+  return (
+    <PageContainer themeMode={themeMode}>
+      <Title>{L('Available Routes')}</Title>
+
+      {error && <ErrorMsg>{error}</ErrorMsg>}
+
+      {!error && routes.length === 0 && (
+        <ErrorMsg>{L('No routes found for your search')}</ErrorMsg>
+      )}
+
+      {!error && routes.length > 0 && (
+        <RoutesGrid>
+          {routes.map(route => (
+            <RouteCard key={route.id} themeMode={themeMode}>
+              <RouteDetails themeMode={themeMode}>
+                <h3>{route.origin} → {route.destination}</h3>
+                <p>{new Date(route.departure_time).toLocaleString()}</p>
+                <p>{route.seats_available} {L('seats_left')}</p>
+              </RouteDetails>
+              <ActionBar>
+                <PriceText>{route.price} UAH</PriceText>
+                <BookBtn onClick={() => handleBook(route.id)}>
+                  {L('book_now')}
+                </BookBtn>
+              </ActionBar>
+            </RouteCard>
+          ))}
+        </RoutesGrid>
+      )}
+    </PageContainer>
+  );
+}
